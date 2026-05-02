@@ -20,6 +20,7 @@ output_details = interpreter.get_output_details()
 
 LABELS = ['Type 1', 'Type 2', 'Type 3']
 
+# function to preprocess input image
 def preprocess_image(base64_img):
     # Decode base64
     data = base64_img.split(',')[1] if ',' in base64_img else base64_img
@@ -32,10 +33,12 @@ def preprocess_image(base64_img):
     img = np.expand_dims(img, axis=0)
     return img
 
+# /health page
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "live"}), 200
 
+# classify image page
 @app.route('/classify', methods=['POST'])
 def classify():
     try:
