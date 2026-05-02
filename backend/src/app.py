@@ -4,15 +4,14 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from base64 import b64decode
-import tensorflow as tf
+from ai_edge_litert import interpreter as litert_interpreter
 
 app = Flask(__name__)
 CORS(app) # Allows the frontend to communicate with the backend
 
-# Load TFLite model and allocate tensors
-MODEL_PATH = "../artifact/model/cancer_screen_model.tflite"
-interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
-interpreter.allocate_tensors()
+# Load TFLite model using LiteRT interpreter
+MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "artifact/model/cancer_screen_model.tflite")
+interpreter = litert_interpreter.Interpreter(model_path=MODEL_PATH)
 
 # Get input and output details
 input_details = interpreter.get_input_details()
@@ -32,6 +31,17 @@ def preprocess_image(base64_img):
     img = img.astype(np.float32) / 255.0
     img = np.expand_dims(img, axis=0)
     return img
+
+# /home page
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({
+        "message": "Welcome to CervixScan API",
+        "endpoints": {
+            "/health": "GET - Health check",
+            "/classify": "POST - Classify cervix type from image"
+        }
+    }), 200
 
 # /health page
 @app.route('/health', methods=['GET'])
