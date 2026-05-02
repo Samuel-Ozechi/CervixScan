@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CervixScan</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f7f6; }
+        .card { background: white; padding: 20px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #preview { max-width: 300px; margin-top: 20px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Cervix Type Classifier</h2>
+        <input type="file" id="imageUpload" accept="image/*">
+        <br>
+        <img id="preview">
+        <h3 id="result"></h3>
+    </div>
+
+    <script>
+        const imageUpload = document.getElementById('imageUpload');
+        const resultText = document.getElementById('result');
+        const preview = document.getElementById('preview');
+
+        imageUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async (event) => {
+                const base64 = event.target.result;
+                preview.src = base64;
+                preview.style.display = 'block';
+                resultText.innerText = "Analyzing...";
+
+                // API CALL
+                const response = await fetch('YOUR_BACKEND_URL/classify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image_data: base64 })
+                });
+                
+                const data = await response.json();
+                resultText.innerText = `Result: ${data.class} (${(data.confidence * 100).toFixed(2)}%)`;
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
+</body>
+</html>
