@@ -1,4 +1,4 @@
-# CervixScan — AI-Powered Cervical Type Classifier
+# CervixScan: AI-Powered Cervical Type Classifier
 
 > A deep learning-based web application that classifies cervical colposcopy images into Type 1, Type 2, or Type 3 transformation zones, built to support clinical screening workflows.
 
