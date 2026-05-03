@@ -4,35 +4,9 @@
 
 <br>
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Project Structure](#project-structure)
-- [ML Model](#ml-model)
-  - [Dataset](#dataset)
-  - [Data Cleaning](#data-cleaning)
-  - [Model Architecture](#model-architecture)
-  - [Training](#training)
-  - [Evaluation](#evaluation)
-  - [Known Limitations](#known-limitations)
-- [Backend Service](#backend-service)
-  - [Endpoints](#endpoints)
-  - [Setup & Running Locally](#setup--running-locally)
-  - [Deployment](#deployment)
-- [Frontend Web App](#frontend-web-app)
-  - [Features](#features)
-  - [Running Locally](#running-locally)
-  - [Configuration](#configuration)
-- [End-to-End Flow](#end-to-end-flow)
-- [Future Improvements](#future-improvements)
-- [Authors](#authors)
-- [Disclaimer](#disclaimer)
-
----
-
 ## Overview
 
-CervixScan is a full-stack AI application that allows clinicians and researchers to upload a cervical colposcopy image and receive an instant classification result with per-class confidence scores. It is powered by a transfer-learned VGG16 convolutional neural network, served via a Flask REST API, and accessed through a responsive web frontend.
+CervixScan is an AI powered web application that allows clinicians and researchers to upload a cervical colposcopy image and receive an instant classification result with per-class confidence scores. It is powered by a transfer-learned VGG16 convolutional neural network, served via a Flask REST API, and accessed through a responsive web frontend.
 
 The three cervical types the model distinguishes are:
 
@@ -82,17 +56,6 @@ The model was trained on the **Intel MobileODT Cervical Cancer Screening** datas
 
 > **Note:** The dataset is significantly imbalanced — Type 2 accounts for over 50% of total samples. This is expected to produce a model with higher precision on Type 2 and lower recall on Type 1.
 
-### Data Cleaning
-
-Before training, the dataset underwent the following preprocessing steps:
-
-- **Duplicate check** — No filepath duplicates were found across the 8,215 files.
-- **Corrupt file removal** — 3 unreadable image files were identified using `PIL.Image.open()` exception handling and dropped, leaving 8,212 valid samples.
-- **Train/Val/Test split** — Stratified splitting was applied to preserve class distribution:
-  - Training: 6,569 images (80%)
-  - Validation: 821 images (10%)
-  - Test: 822 images (10%)
-
 ### Model Architecture
 
 The classifier is built using **transfer learning** on top of a pretrained **VGG16** backbone (ImageNet weights):
@@ -115,36 +78,12 @@ Non-trainable:      7,635,264
 - **Input size:** 180 × 180 × 3
 - **Output:** Softmax probabilities over 3 classes
 
-### Training
-
-Images were augmented on-the-fly during training using the following transforms:
-
-| Augmentation       | Value  |
-|--------------------|--------|
-| Rotation range     | 40°    |
-| Zoom range         | 20%    |
-| Width shift        | 20%    |
-| Height shift       | 20%    |
-| Shear range        | 20%    |
-| Horizontal flip    | ✅     |
-| Vertical flip      | ✅     |
-
-Training ran for up to 100 epochs with the following callbacks:
-
-- **EarlyStopping** — Monitored `val_loss`, patience of 20 epochs; restored best weights
-- **ReduceLROnPlateau** — Reduced LR by factor 0.2 when val_loss stagnated for 10 epochs (min LR: `1e-5`)
-- **ModelCheckpoint** — Saved weights only when `val_loss` improved
-
-Training stopped at **epoch 52** via early stopping, with best weights restored from **epoch 32**.
-
 ### Evaluation
 
 | Metric         | Value   |
 |----------------|---------|
 | Test Loss      | 0.7693  |
 | Test Accuracy  | **71.3%** |
-
-The training/validation accuracy and loss curves indicated **overfitting**, with training accuracy reaching ~89% while validation accuracy plateaued around 70–74%.
 
 ### Known Limitations
 
@@ -163,7 +102,7 @@ Recommended paths for improvement:
 
 ## Backend Service
 
-The backend is a **Flask** REST API that loads the trained model as a **TFLite** file for efficient inference and exposes endpoints for image classification.
+The backend is deployed at **[CervixScan-Service](https://cervixscan-service.onrender.com). It utilizes a **Flask** REST API that loads the trained model as a **TFLite** file for efficient inference and exposes endpoints for image classification.
 
 ### Endpoints
 
@@ -292,67 +231,8 @@ The API will be available at `http://localhost:5000`.
 
 ---
 
-### Deployment
-
-The backend is deployed on **[Render](https://render.com)** at:
-
-```
-https://cervixscan.onrender.com
-```
-
-To deploy your own instance on Render:
-
-1. Push your code to a GitHub repository.
-2. Create a new **Web Service** on Render.
-3. Set the **Build Command** to:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Set the **Start Command** to:
-   ```bash
-   python backend/app.py
-   ```
-5. Add the model file to the repository or configure a persistent disk in Render.
-
-> **Note:** Render's free tier spins down after inactivity. The first request after a cold start may take 30–60 seconds.
-
----
-
-## Frontend Web App
-
-The frontend is a fully self-contained **single HTML file** — no build tools or frameworks required.
-
-### Features
-
-- **Drag-and-drop** or click-to-browse image upload
-- Live **image preview** with an animated analysis overlay
-- One-click **Classify Image** button (disabled until an image is loaded)
-- **Per-class probability bars** with animated fill on result
-- Fully **responsive** layout for desktop and mobile
-- Informational **How it Works** section
-- Medical **disclaimer** panel
-
-### Running Locally
-
-Simply open `frontend/index.html` in any modern browser. No server is required for the frontend itself.
-
-```bash
-open frontend/index.html       # macOS
-start frontend/index.html      # Windows
-xdg-open frontend/index.html   # Linux
-```
-
-### Configuration
-
-The backend URL is defined as a JavaScript constant at the top of the `<script>` block in `index.html`. Update it if you deploy your own backend instance:
-
-```javascript
-const BACKEND_URL = 'https://cervixscan.onrender.com';
-```
-
-Replace the value with your own backend URL (e.g., `http://localhost:5000` for local development).
-
----
+##  Web Application
+The web application is available at **[CervixScan](htts://cervixscan.onrender.com)** 
 
 ## End-to-End Flow
 
