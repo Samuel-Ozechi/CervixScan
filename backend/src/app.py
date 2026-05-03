@@ -1,27 +1,23 @@
+import os
 import numpy as np
 import cv2
-import os
+import tensorflow as tf
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from base64 import b64decode
-try:
-    import tflite_runtime.interpreter as tflite
-except ImportErrors:
-    from tensorflow.lite.python.interpreter import Interpreter as tflite
-from ai_edge_litert import interpreter as litert_interpreter
 
 app = Flask(__name__)
-CORS(app) # Allows the frontend to communicate with the backend
+CORS(app)
 
-# Load TFLite model using LiteRT interpreter
-MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "artifact/model/cancer_screen_model.tflite")
-interpreter = tflite.Interpreter(model_path=MODEL_PATH)
+# Load TFLite model using the standard TF Lite Interpreter
+# This is much faster than loading a full .h5 model
+MODEL_PATH = os.path.join("model", "cancer_screen_model.tflite")
+interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
+interpreter.allocate_tensors()
 
-# Get input and output details
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
-
-LABELS = ['Type 1', 'Type 2', 'Type 3']
+labels = ['Type 1', 'Type 2', 'Type 3']
 
 # function to preprocess input image
 def preprocess_image(base64_img):
@@ -53,27 +49,29 @@ def health():
     return jsonify({"status": "live"}), 200
 
 # classify image page
-@app.route('/classify', methods=['POST'])
-def classify():
+app.route('/classify', methods=['POST'])
+def classify_img():
     try:
         data = request.json
-        if 'image_data' not in data:
+        image_data = data.get('image_data')
+        
+        if not image_data:
             return jsonify({"error": "No image data provided"}), 400
 
-        input_data = preprocess_image(data['image_data'])
+        input_data = preprocess(image_data)
 
-        # Run inference
+        # Set the tensor to point to the input data to be inferred
         interpreter.set_tensor(input_details[0]['index'], input_data)
         interpreter.invoke()
-        
-        # Get results
+
+        # Extract the results
         output_data = interpreter.get_tensor(output_details[0]['index'])[0]
         prediction_idx = np.argmax(output_data)
         
         return jsonify({
-            'class': LABELS[prediction_idx],
-            'probability': output_data.tolist(),
-            'confidence': float(output_data[prediction_idx])
+            'class': labels[prediction_idx],
+            'confidence': float(output_data[prediction_idx]),
+            'all_probabilities': output_data.tolist()
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
