@@ -102,7 +102,7 @@ Recommended paths for improvement:
 
 ## Backend Service
 
-The backend is deployed at **[CervixScan-Service](https://cervixscan-service.onrender.com). It utilizes a **Flask** REST API that loads the trained model as a **TFLite** file for efficient inference and exposes endpoints for image classification.
+The backend is deployed at **[CervixScan-Service](https://cervixscan-service.onrender.com)**. It utilizes a **Flask** REST API that loads the trained model as a **TFLite** file for efficient inference and exposes endpoints for image classification.
 
 ### Endpoints
 
