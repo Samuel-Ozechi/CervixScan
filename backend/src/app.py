@@ -7,7 +7,7 @@ from flask_cors import CORS
 from base64 import b64decode
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Load TFLite model using the standard TF Lite Interpreter
 # This is much faster than loading a full .h5 model
