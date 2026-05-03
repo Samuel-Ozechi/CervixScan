@@ -11,7 +11,7 @@ CORS(app)
 
 # Load TFLite model using the standard TF Lite Interpreter
 # This is much faster than loading a full .h5 model
-MODEL_PATH = os.path.join("model", "cancer_screen_model.tflite")
+MODEL_PATH = os.path.join("backend", "artifact", "model", "cancer_screen_model.tflite")
 interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
 
