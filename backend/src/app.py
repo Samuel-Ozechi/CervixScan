@@ -49,7 +49,7 @@ def health():
     return jsonify({"status": "live"}), 200
 
 # classify image page
-app.route('/classify', methods=['POST'])
+@app.route('/classify', methods=['POST'])
 def classify_img():
     try:
         data = request.json
@@ -58,7 +58,7 @@ def classify_img():
         if not image_data:
             return jsonify({"error": "No image data provided"}), 400
 
-        input_data = preprocess(image_data)
+        input_data = preprocess_image(image_data)
 
         # Set the tensor to point to the input data to be inferred
         interpreter.set_tensor(input_details[0]['index'], input_data)
