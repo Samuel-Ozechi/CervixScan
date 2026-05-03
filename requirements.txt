@@ -1,6 +1,3 @@
-# local package
--e .
-
 # external requirements
 flask
 flask-cors
