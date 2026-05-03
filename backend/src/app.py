@@ -4,6 +4,10 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from base64 import b64decode
+try:
+    import tflite_runtime.interpreter as tflite
+except ImportErrors:
+    from tensorflow.lite.python.interpreter import Interpreter as tflite
 from ai_edge_litert import interpreter as litert_interpreter
 
 app = Flask(__name__)
@@ -11,7 +15,7 @@ CORS(app) # Allows the frontend to communicate with the backend
 
 # Load TFLite model using LiteRT interpreter
 MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "artifact/model/cancer_screen_model.tflite")
-interpreter = litert_interpreter.Interpreter(model_path=MODEL_PATH)
+interpreter = tflite.Interpreter(model_path=MODEL_PATH)
 
 # Get input and output details
 input_details = interpreter.get_input_details()
