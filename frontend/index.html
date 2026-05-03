@@ -22,25 +22,46 @@
         const resultText = document.getElementById('result');
         const preview = document.getElementById('preview');
 
+        const BACKEND_URL = 'https://cervixscan.onrender.com'; 
+
         imageUpload.addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            const reader = new FileReader();
+            if (!file) return;
 
+            const reader = new FileReader();
             reader.onload = async (event) => {
                 const base64 = event.target.result;
                 preview.src = base64;
                 preview.style.display = 'block';
-                resultText.innerText = "Analyzing...";
+                resultText.innerText = "Analyzing... Please wait.";
+                resultText.style.color = "blue";
 
-                // API CALL
-                const response = await fetch('https://cervixscan.onrender.com/classify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image_data: base64 })
-                });
-                
-                const data = await response.json();
-                resultText.innerText = `Result: ${data.class} (${(data.confidence * 100).toFixed(2)}%)`;
+                try {
+                    const response = await fetch(`${BACKEND_URL}/classify`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image_data: base64 })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    if(data.error) {
+                        resultText.innerText = `Error: ${data.error}`;
+                        resultText.style.color = "red";
+                    } else {
+                        resultText.innerText = `Result: ${data.class} (${(data.confidence * 100).toFixed(2)}%)`;
+                        resultText.style.color = "green";
+                    }
+
+                } catch (err) {
+                    console.error("Fetch Error:", err);
+                    resultText.innerText = "Failed to connect to backend. Check console (F12).";
+                    resultText.style.color = "red";
+                }
             };
             reader.readAsDataURL(file);
         });
